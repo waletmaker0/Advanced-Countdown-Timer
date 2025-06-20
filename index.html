@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Countdown Timer</title>
+  <style>
+    :root {
+      --bg: #1d1e26;
+      --text: #ffffff;
+      --accent: #6c5ce7;
+      --circle-bg: #2d2f3b;
+    }
+
+    body.light {
+      --bg: #f3f4f6;
+      --text: #000000;
+      --accent: #1d2b64;
+      --circle-bg: #d1d5db;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .countdown {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .circle {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      background: var(--circle-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circle svg {
+      position: absolute;
+      top: 0; left: 0;
+      transform: rotate(-90deg);
+    }
+
+    .circle .number {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .label {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+
+    @media (max-width: 500px) {
+      .circle {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+
+  <h1>Advanced Countdown Timer</h1>
+
+  <div class="controls">
+    <input type="datetime-local" id="datetime" />
+    <button onclick="startCountdown()">Start</button>
+    <button onclick="shareCountdown()">Share</button>
+  </div>
+
+  <div class="countdown">
+    <div>
+      <div class="circle">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="45" stroke="var(--accent)" stroke-width="8" fill="none" id="circle-days"/>
+        </svg>
+        <div class="number" id="days">0</div>
+      </div>
+      <div class="label">Days</div>
+    </div>
+    <div>
+      <div class="circle">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="45" stroke="var(--accent)" stroke-width="8" fill="none" id="circle-hours"/>
+        </svg>
+        <div class="number" id="hours">0</div>
+      </div>
+      <div class="label">Hours</div>
+    </div>
+    <div>
+      <div class="circle">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="45" stroke="var(--accent)" stroke-width="8" fill="none" id="circle-minutes"/>
+        </svg>
+        <div class="number" id="minutes">0</div>
+      </div>
+      <div class="label">Minutes</div>
+    </div>
+    <div>
+      <div class="circle">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="45" stroke="var(--accent)" stroke-width="8" fill="none" id="circle-seconds"/>
+        </svg>
+        <div class="number" id="seconds">0</div>
+      </div>
+      <div class="label">Seconds</div>
+    </div>
+  </div>
+
+  <script>
+    let interval;
+
+    function polar(percent) {
+      const radius = 45;
+      const circumference = 2 * Math.PI * radius;
+      return `${circumference - (percent / 100) * circumference},${circumference}`;
+    }
+
+    function setCircle(id, percent) {
+      const el = document.getElementById(id);
+      el.setAttribute("stroke-dasharray", polar(percent));
+      el.setAttribute("stroke-linecap", "round");
+    }
+
+    function startCountdown() {
+      clearInterval(interval);
+      const input = document.getElementById('datetime').value;
+      const target = new Date(input).getTime();
+
+      if (!target || isNaN(target)) {
+        alert("Please enter a valid date and time.");
+        return;
+      }
+
+      interval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = target - now;
+
+        if (distance <= 0) {
+          clearInterval(interval);
+          alert("Countdown finished!");
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").textContent = days;
+        document.getElementById("hours").textContent = hours;
+        document.getElementById("minutes").textContent = minutes;
+        document.getElementById("seconds").textContent = seconds;
+
+        setCircle("circle-days", (days % 365) / 365 * 100);
+        setCircle("circle-hours", (hours % 24) / 24 * 100);
+        setCircle("circle-minutes", (minutes % 60) / 60 * 100);
+        setCircle("circle-seconds", (seconds % 60) / 60 * 100);
+      }, 1000);
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    function shareCountdown() {
+      const days = document.getElementById("days").textContent;
+      const hours = document.getElementById("hours").textContent;
+      const minutes = document.getElementById("minutes").textContent;
+      const seconds = document.getElementById("seconds").textContent;
+
+      const text = `⏳ Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s left!`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Countdown copied to clipboard!");
+      });
+    }
+  </script>
+
+</body>
+</html>
