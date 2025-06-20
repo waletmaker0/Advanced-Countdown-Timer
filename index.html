@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Advanced Countdown Timer</title>
+  <title>Countdown Timer with Alarm</title>
   <style>
     :root {
       --bg: #1d1e26;
@@ -27,8 +27,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem;
+      padding: 1rem;
       transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
     }
 
     h1 {
@@ -39,10 +40,12 @@
 
     .controls {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
+      align-items: center;
       margin-bottom: 1rem;
+      width: 100%;
+      max-width: 400px;
     }
 
     input, button {
@@ -50,6 +53,8 @@
       font-size: 1rem;
       border-radius: 8px;
       border: none;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     button {
@@ -69,13 +74,14 @@
 
     .circle {
       position: relative;
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       background: var(--circle-bg);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 5px;
     }
 
     .circle svg {
@@ -91,21 +97,38 @@
 
     .label {
       text-align: center;
-      margin-top: 5px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       opacity: 0.8;
     }
 
     .theme-toggle {
-      position: absolute;
-      top: 15px;
-      right: 15px;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      font-size: 1.2rem;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
       .circle {
-        width: 80px;
-        height: 80px;
+        width: 75px;
+        height: 75px;
+      }
+
+      .circle .number {
+        font-size: 1rem;
+      }
+
+      .label {
+        font-size: 0.75rem;
       }
     }
   </style>
@@ -114,12 +137,12 @@
 
   <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
 
-  <h1>Advanced Countdown Timer</h1>
+  <h1>Countdown Timer</h1>
 
   <div class="controls">
     <input type="datetime-local" id="datetime" />
-    <button onclick="startCountdown()">Start</button>
-    <button onclick="shareCountdown()">Share</button>
+    <button onclick="startCountdown()">Start Countdown</button>
+    <button onclick="shareCountdown()">Share Countdown</button>
   </div>
 
   <div class="countdown">
@@ -161,6 +184,12 @@
     </div>
   </div>
 
+  <!-- 🔔 Hidden audio element -->
+  <audio id="alarmSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+    Your browser does not support the audio element.
+  </audio>
+
   <script>
     let interval;
 
@@ -192,7 +221,8 @@
 
         if (distance <= 0) {
           clearInterval(interval);
-          alert("Countdown finished!");
+          playAlarm();
+          alert("⏰ Countdown finished!");
           return;
         }
 
@@ -224,9 +254,16 @@
       const seconds = document.getElementById("seconds").textContent;
 
       const text = `⏳ Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s left!`;
-
       navigator.clipboard.writeText(text).then(() => {
         alert("Countdown copied to clipboard!");
+      });
+    }
+
+    function playAlarm() {
+      const sound = document.getElementById("alarmSound");
+      sound.play().catch(() => {
+        // fallback if autoplay is blocked
+        alert("Timer done! Please allow sound manually.");
       });
     }
   </script>
